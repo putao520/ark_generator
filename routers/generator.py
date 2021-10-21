@@ -54,3 +54,33 @@ async def upgrade(_id: str, name: str, file: str):
                 return {'status': SyntaxError}
             except Exception:
                 return {'status': Exception}
+
+@router.get('/upgrade2/{_id}/{name}/{file}')
+async def upgrade2(_id: str, name: str, file: str):
+    # 下载 pdb
+    url = "http://msdl.microsoft.com" + "/download/symbols/" + name + "/" + _id + "1/" + name
+    async with aiohttp.ClientSession() as session:
+        headers = {"User-Agent": "Microsoft-Symbol-Server/10.1710.0.0", "Accept-Encoding": "gzip"}
+        async with session.get(url, headers=headers) as res:
+            try:
+                if res.ok:
+                    path = files.build("./pdb/" + _id + "/" + name)
+                    async with aiofiles.open(path, mode='wb+') as fp:
+                        while True:
+                            chunk = await res.content.read(0x8000)
+                            if not chunk:
+                                break
+                            await fp.write(chunk)
+                        await fp.close()
+                        # 解析PDB并生产JS头文件,提交到存储服务,返回下载地址
+                        pdb = PDB(_id, file, path)
+                        # js = pdb.string()
+                        # return {'status': 'ok'}
+                        # return js.encode(encoding='utf-8')
+                        return {'status': 'ok', 'data': await pdb.export()}
+                else:
+                    return {'status': res.reason}
+            except SyntaxError:
+                return {'status': SyntaxError}
+            except Exception:
+                return {'status': Exception}

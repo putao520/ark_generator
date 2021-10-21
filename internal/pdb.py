@@ -62,15 +62,16 @@ class PDB:
                 self.ARCH_PTR_SIZE = 4
         self.sign = sign
         self.name = name
+        self.name_str = name.replace(".", "_")
         self.out_buffer = self.init()
         self.structs_dict = {}
 
     # 初始化js
     def init(self):
         return f'''const memory = require("./MemoryBuffer.js");
-        const {self.name.replace(".", "_")} = {{
-            static base = findDriver("{self.name}"),
-            static name = "{self.name}",
+        const {self.name_str} = {{
+            base: findDriver("{self.name}"),
+            name: "{self.name}",
             '''
 
     # 判断结构成员字节长度
@@ -97,7 +98,7 @@ class PDB:
     def vars(self):
         g_syms = self.parse.STREAM_GSYM
         self.out_buffer += f'''
-            vars: {{'''
+            variable: {{'''
         # 遍历变量
         for name, info in g_syms.vars.items():
             if info.segment < len(self.sects):
@@ -109,7 +110,7 @@ class PDB:
                 # print("var=> %s,%#x,%d" % (name, va_off, info.symtype))
                 self.out_buffer += f'''
                 get {name}(){{
-                    return memory.from(base + {hex(va_off)}, {self.ARCH_PTR_SIZE});
+                    return memory.from({self.name_str}.base + {hex(va_off)}n, {self.ARCH_PTR_SIZE});
                 }},'''
         self.out_buffer += f'''
             }},
@@ -118,15 +119,21 @@ class PDB:
 
     # 处理全局函数
     def funcs(self):
+        result_name = re.compile(r"^[a-zA-Z_$]")
         g_syms = self.parse.STREAM_GSYM
         self.out_buffer += f'''
-            funcs: {{'''
+            functional: {{
+            '''
         # 遍历函数
         for name, info in g_syms.funcs.items():
-            va_off = self.sects[info.segment - 1].VirtualAddress + info.offset
-            # print("func=> %s,%#x,%d" % (name, va_off, info.symtype))
-            self.out_buffer += f'''{name}: (...args) => procedure(base + {hex(va_off)}, args),
-            '''
+            # breakpoint()
+            if result_name.match(name):
+                va_off = self.sects[info.segment - 1].VirtualAddress + info.offset
+                # print("func=> %s,%#x,%d" % (name, va_off, info.symtype))
+                self.out_buffer += f'''{name}: (...args) => procedure({self.name_str}.base + {hex(va_off)}n, 1, args),
+                '''
+            # else:
+                # breakpoint()
         self.out_buffer += f'''
             }},
         '''
@@ -153,14 +160,14 @@ class PDB:
             return f"""
                     // pointer-array
                     {name}(index){{
-                        return this.#buffer.pointer({offset} + (index * {self.ARCH_PTR_SIZE}));
+                        return this.#buffer.pointer({offset}n + (BigInt(index) * {self.ARCH_PTR_SIZE}n));
                     }}
                     """
         else:
             return f"""
                     // pointer
                     {name}(){{
-                        return this.#buffer.pointer({offset});
+                        return this.#buffer.pointer({offset}n);
                     }}
             """
 
@@ -169,7 +176,7 @@ class PDB:
             return f"""
                     // enum-array
                     {name}(index){{
-                        const b = new DataView(this.#buffer.read(4, {offset} + (index * 4)), 0);
+                        const b = new DataView(this.#buffer.read(4, {offset}n + (BigInt(index) * 4n)), 0);
                         return b.getUint32();
                     }}
             """
@@ -177,7 +184,7 @@ class PDB:
             return f"""
                     // enum
                     {name}(){{
-                        const b = new DataView(this.#buffer.read(4, {offset}), 0);
+                        const b = new DataView(this.#buffer.read(4, {offset}n), 0);
                         return b.getUint32();
                     }}
             """
@@ -187,11 +194,20 @@ class PDB:
         # info.size # array 总大小
         if isinstance(info.element_type, str):
             member_size = self.__get_member_size(str(info.element_type))
+            # breakpoint()
+            total_size = int(info.size/member_size)
             return f"""
                     // array
-                    {name}(index, length=1){{
+                    {name}(index, length={total_size}){{
                         const size = {member_size};
-                        return this.#buffer.read(size * length, ({offset} + (size * index));
+                        return this.#buffer.read(size * length, ({offset}n + BigInt(size * index)));
+                    }}
+                    {name}Offset(index=0){{
+                        const size = {member_size};
+                        return {offset}n + BigInt(size * index);
+                    }}
+                    {name}Size(){{
+                        return {info.size};
                     }}
             """
         else:
@@ -202,6 +218,10 @@ class PDB:
                 _name = element_info.name
             else:
                 _name = name
+
+            if len(_name) == 0:
+                _name = name
+
             return self.__build_struct_index(element_info, _name, offset, True)
 
     def __build_struct_value(self, info, name, offset, child=False):
@@ -222,7 +242,7 @@ class PDB:
             return f"""
                     // value-array
                     {name}(index){{
-                        const b = new DataView(this.#buffer.read({member_size}, ({offset} + ( index * {member_size}))), 0);
+                        const b = new DataView(this.#buffer.read({member_size}, ({offset}n + ( index * {member_size}n))), 0);
                         return {line_str};
                     }}
             """
@@ -230,7 +250,7 @@ class PDB:
             return f"""
                     // value
                     {name}(){{
-                        const b = new DataView(this.#buffer.read({member_size}, {offset}), 0);
+                        const b = new DataView(this.#buffer.read({member_size}, {offset}n), 0);
                         return {line_str};
                     }}
             """
@@ -258,6 +278,9 @@ class PDB:
         else:
             if hasattr(index, 'name') and len(index.name) > 0:
                 name = index.name
+
+            if str(name).startswith("<"):
+                return code
 
             # breakpoint()
             match str(index.leaf_type):
@@ -313,6 +336,8 @@ class PDB:
         if info.leaf_type == 'LF_STRUCTURE' or info.leaf_type == 'LF_UNION':
             # print(info.name)
             code += self.__build_structure(info, child)
+
+        # breakpoint()
         if not inline:
             return f"""
                 {info.name}: class{{
@@ -320,8 +345,11 @@ class PDB:
                     constructor(address) {{
                         this.#buffer = memory.from(address, {info.size})
                     }}
+                    getSize(){{
+                        return {info.size};
+                    }}
                     {code}
-                }}
+                }},
             """
         else:
             offset_str = offset if len(str_offset) == 0 else str_offset
@@ -333,9 +361,12 @@ class PDB:
                     constructor(address) {{
                         this.#buffer = memory.from(address, {info.size})
                     }}
+                    getSize(){{
+                        return {info.size};
+                    }}
                     {code}
                 }}
-                return new cls(this.#buffer.address() + {offset_str});
+                return new cls(this.#buffer.address() + {offset_str}n);
             """
 
     def __build_structs(self):
@@ -346,7 +377,7 @@ class PDB:
             buffer += self.__build_structs_warp(info)
         # ===========================
         return f"""
-            structs:{{
+            structure:{{
                 {buffer}
             }}
         """
@@ -356,15 +387,19 @@ class PDB:
         self.structs_dict = self.__pre_build_structs()
         self.out_buffer += self.__build_structs()
 
+    def remove_null_line(self):
+        self.out_buffer = self.out_buffer.replace("\n\n", "\n")
+
     # 查看JS
     def string(self):
         self.vars()
         self.funcs()
         self.structs()
+        self.remove_null_line()
         self.parse.fp.close()
         return str(self.out_buffer + f'''
         }}
-{self.name.replace(".", "_")}''')
+{self.name_str}''')
 
     # 导出JS文件
     async def export(self):
