@@ -8,7 +8,8 @@ def testMysql():
     engine = create_engine(SQLALCHEMY_DATABASE_URL, encoding='utf8', echo=True)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = SessionLocal()
-    print(session.query(FilesObject).all())
+    # print(session.query(FilesObject) .all())
+    print(session.query(FilesObject).filter(FilesObject.file_name == 'putao52.c').first() )
 
 if __name__ == '__main__':
     testMysql()

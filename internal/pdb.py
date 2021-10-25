@@ -411,3 +411,7 @@ class PDB:
             await fp.close()
             self.out_buffer = self.init()
         return path
+
+    @staticmethod
+    def build_path(_id: str, name: str):
+        return "./js/" + _id + "/" + name + ".js"

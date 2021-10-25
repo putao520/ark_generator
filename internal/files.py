@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 
@@ -31,3 +32,11 @@ class Files:
         # 上传文件到minio
         # 新增文件管理信息到文件管理系统
         return fullPath if flag else None
+
+    @staticmethod
+    def md5(filename):
+        m = hashlib.md5()
+        mfile = open(filename, 'rb')
+        m.update(mfile.read())
+        mfile.close()
+        return m.hexdigest()
