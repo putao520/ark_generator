@@ -74,5 +74,5 @@ class LibraryService:
         for item in self.taskArr:
             download_url = await info(item['id'], item['name'], item['file'])
             if download_url is not None:
-                result[item['id']] = download_url
+                result[item['file']] = download_url
         return result
