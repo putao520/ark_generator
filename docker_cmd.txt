@@ -1,0 +1,19 @@
+### 打包
+docker build -t ark-generator .
+
+### 启动
+docker run -d --name ark-generator-service -p 8000:8000 ark-generator
+
+### 打标签
+docker tag ark-generator 192.168.75.80:5000/ark-generator:2021110301
+
+### 推送到私库
+docker push 192.168.75.80:5000/ark-generator:2021110301
+
+```
+修改客户端 docker 设置(让其支持 http)
+%USERPROFILE%/.docker/daemon.json
+>>
+"insecure-registries": ["192.168.75.80:5000"]
+// 其中IP和端口改成当前docker私库的实际信息
+```
