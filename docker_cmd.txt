@@ -16,4 +16,13 @@ docker push 192.168.75.80:5000/ark-generator:2021110301
 >>
 "insecure-registries": ["192.168.75.80:5000"]
 // 其中IP和端口改成当前docker私库的实际信息
+
+查看上传的images
+http://192.168.75.80:5000/v2/_catalog
 ```
+
+### 下载images
+docker pull 192.168.75.80:5000/ark-generator:2021110301
+
+### 启动私有docker
+docker run -d --name ark-generator-service -p 8000:8000 192.168.75.80:5000/ark-generator:2021110301
