@@ -1,0 +1,13 @@
+{
+  "oss": {
+    "host": "192.168.75.80:9000",
+    "access_key": "minio",
+    "secret_key": "putao520"
+  },
+  "db": {
+    "host": "192.168.75.80:3306",
+    "database": "fos",
+    "user": "root",
+    "password": "123456"
+  }
+}

@@ -1,0 +1,10 @@
+SQLAlchemy~=1.4.26
+minio~=7.1.1
+urllib3~=1.26.7
+aiofiles~=0.7.0
+aiohttp~=3.7.4.post0
+uvicorn~=0.15.0
+fastapi~=0.70.0
+pydantic~=1.8.2
+starlette~=0.16.0
+pdbparse~=1.5

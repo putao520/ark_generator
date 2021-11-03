@@ -7,6 +7,10 @@ import minio
 from minio import Minio
 from urllib3.exceptions import ResponseError
 
+from config.config import Config
+
+store_cfg = Config().get_instance().getDB()
+
 
 def generator(_prefix):
     rt = ""
@@ -27,7 +31,9 @@ class oss:
     handle = None
 
     def __init__(self):
-        self.minioClient = Minio('192.168.75.80:9000', access_key='minio', secret_key='putao520', secure=False)
+        # self.minioClient = Minio('192.168.75.80:9000', access_key='minio', secret_key='putao520', secure=False)
+        self.minioClient = Minio(str(store_cfg["host"]), access_key=str(store_cfg["access_key"]),
+                                 secret_key=str(store_cfg["secret_key"]), secure=False)
         if not self.minioClient.bucket_exists(oss.bucket_name):
             self.minioClient.make_bucket(oss.bucket_name)
 

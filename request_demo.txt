@@ -1,0 +1,23 @@
+post:
+http://host/generator/upgrade
+
+content-type:application/json
+body:
+{
+    "item":[
+        {
+            "id":"debug directory guid",
+            "name":"pdn name",
+            "file":"org file name"
+        },
+
+    ]
+}
+
+result:
+{
+    "code":"error number",
+    "data":{
+        "file name":"download url(once)"
+    }
+}
