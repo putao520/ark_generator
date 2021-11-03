@@ -21,3 +21,22 @@ result:
         "file name":"download url(once)"
     }
 }
+# =====================================================
+demo:
+request:
+url:http://127.0.0.1:8000/generator/upgrade
+body:
+{
+	"item": [{
+		"id": "1B4A6F5E0766C552C90710C8ACC0295C",
+		"name": "ntkrnlmp.pdb",
+		"file": "ntoskrnl.exe"
+	}]
+}
+result:
+{
+    "code": 0,
+    "data": {
+        "ntoskrnl.exe": "http://192.168.75.80:9000/fos/17496205625287119340_20211103142615_%E4%B8%AD%E5%9B%BD%E6%A0%87%E5%87%86%E6%97%B6%E9%97%B4_ntkrnlmp.pdb.js?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minio%2F20211103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20211103T062621Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=6b6a24ba15dff8601fad997c9d7c1b36cdc09e449a1b89be7686de6304cd857c"
+    }
+}

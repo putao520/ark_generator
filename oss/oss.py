@@ -9,7 +9,7 @@ from urllib3.exceptions import ResponseError
 
 from config.config import Config
 
-store_cfg = Config().get_instance().getDB()
+store_cfg = Config().get_instance().getOSS()
 
 
 def generator(_prefix):
