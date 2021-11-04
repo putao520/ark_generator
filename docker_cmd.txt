@@ -26,3 +26,10 @@ docker pull 192.168.75.80:5000/ark-generator:2021110301
 
 ### 启动私有docker
 docker run -d --name ark-generator-service -p 8000:8000 192.168.75.80:5000/ark-generator:2021110301
+
+### 更换cython
+```
+https://hub.docker.com/r/intellegensdocker/cython/tags
+
+这里更换python docker镜像源为cython
+```
