@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from model.filesObject import FilesObject
+from sqlalchemy.sql import func
 
 SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:123456@192.168.75.80:3306/fos"
 
@@ -10,6 +11,8 @@ def testMysql():
     session = SessionLocal()
     # print(session.query(FilesObject) .all())
     print(session.query(FilesObject).filter(FilesObject.file_name == 'putao52.c').first() )
+    func.now()
+
 
 if __name__ == '__main__':
     testMysql()

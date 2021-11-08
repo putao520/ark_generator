@@ -44,7 +44,10 @@ async def upgrade(arr: InfoArray):
         for info in arr.item:
             service.insert(info.id, info.name, info.file)
         result = await service.get_urls()
-        return msg(data=result)
+        if result is None:
+            return msg(402, "库文件生成中")
+        else:
+            return msg(data=result)
     except BaseException as err:
         print(err)
     return msg(1, "库文件获得失败!")
