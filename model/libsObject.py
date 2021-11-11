@@ -8,8 +8,10 @@ from internal.pdb import PDB
 class LibsObject:
     def __init__(self, _id: str, name: str, file: str):
         self.id = _id
-        self.name = name
-        self.pdb = file
+        # 文件名
+        self.name = file
+        # pdb名
+        self.pdb = name
 
     async def build(self):
         url = "http://msdl.microsoft.com/download/symbols/" + self.name + "/" + self.id + "1/" + self.name
