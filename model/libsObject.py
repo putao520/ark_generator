@@ -14,7 +14,7 @@ class LibsObject:
         self.pdb = file
 
     async def build(self):
-        url = "http://msdl.microsoft.com/download/symbols/" + self.name + "/" + self.id + "1/" + self.name
+        url = "http://msdl.microsoft.com/download/symbols/" + self.name + "/" + self.id + "/" + self.name
         async with aiohttp.ClientSession() as session:
             headers = {"User-Agent": "Microsoft-Symbol-Server/10.1710.0.0", "Accept-Encoding": "gzip"}
             async with session.get(url, headers=headers) as res:
