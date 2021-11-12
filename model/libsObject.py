@@ -9,9 +9,9 @@ class LibsObject:
     def __init__(self, _id: str, name: str, file: str):
         self.id = _id
         # 文件名
-        self.name = file
+        self.name = name
         # pdb名
-        self.pdb = name
+        self.pdb = file
 
     async def build(self):
         url = "http://msdl.microsoft.com/download/symbols/" + self.name + "/" + self.id + "1/" + self.name
@@ -29,7 +29,7 @@ class LibsObject:
                                 await fp.write(chunk)
                             await fp.close()
                             # 解析PDB并生产JS头文件,提交到存储服务,返回下载地址
-                            pdb = PDB(self.id, self.name, path)
+                            pdb = PDB(self.id, self.pdb, path)
                             return await pdb.export()
                     else:
                         return None
