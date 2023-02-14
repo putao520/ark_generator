@@ -5,7 +5,7 @@ minio==7.1.1
 pdbparse==1.5
 pydantic==1.8.2
 SQLAlchemy==1.4.26
-starlette==0.16.0
+starlette==0.25.0
 urllib3==1.26.7
 uvicorn==0.15.0
 PyMySQL==1.0.2
